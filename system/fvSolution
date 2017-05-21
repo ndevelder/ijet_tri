@@ -1,0 +1,119 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM Extend Project: Open Source CFD        |
+|  \\    /   O peration     | Version:  1.6-ext                               |
+|   \\  /    A nd           | Web:      www.extend-project.de                 |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      fvSolution;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+solvers
+{
+    "(phis|phisFinal)"
+    {
+        solver           GAMG;
+        tolerance        1e-6;
+        relTol           0.00005;
+        smoother         GaussSeidel;
+        directSolveCoarsest false;
+        nPreSweeps       0;
+        nPostSweeps      2;
+	nFinestSweeps	2;
+        cacheAgglomeration on;
+        agglomerator     faceAreaPair;
+        nCellsInCoarsestLevel 16;
+	mergeLevels 1;
+	maxIter 256;
+    };
+
+    "(p|pFinal)"
+    {
+     	solver           PCG;
+        preconditioner   DIC;
+        tolerance        1e-6;
+        relTol           0.0;
+        maxIter          256;
+    };
+    "(tpphi|tppsi|R)"
+    {
+        solver           smoothSolver;
+        smoother	 GaussSeidel;
+        tolerance        1e-10;
+        relTol           0.00;
+        maxIter          100;
+        minIter          1;
+    };
+    "(k|epsilon)"
+    {
+        solver           smoothSolver;
+        smoother         GaussSeidel;
+        tolerance        1e-10;
+        relTol           0.00;
+        maxIter          100;
+        minIter          1;
+    };
+    "(U|UFinal)"
+    {
+        solver           smoothSolver;
+        smoother         symGaussSeidel;
+        tolerance        1e-10;
+        relTol           0.00;
+        maxIter          100;
+    };
+}
+
+PIMPLE
+{
+    nOuterCorrectors    2;
+    nCorrectors         1;
+    nNonOrthogonalCorrectors 0;
+    pRefPoint (0.0 0.2 0.0);
+    pRefCell 101;
+    pRefValue 0.0;
+    turbOnFinalIterOnly = true;    
+    correctPhi no;
+}
+
+SIMPLE
+{
+    nNonOrthogonalCorrectors  10;
+    pRefPoint                 (0.995 0.395 0);
+    pRefValue                 0;
+ 
+    residualControl
+    {
+         p                       1e-9;
+         U                       1e-9;
+    }
+}
+ 
+potentialFlow
+{
+    nNonOrthogonalCorrectors 20;
+}
+
+relaxationFactors
+{
+    p               0.4;
+    U               0.6;
+    k               0.6;
+    epsilon         0.6;
+    R               0.8;
+    tpphi           0.5;
+    tppsi           0.5;
+    phis            0.5;
+}
+
+cache
+{
+grad(U);    
+}
+
+// ************************************************************************* //
